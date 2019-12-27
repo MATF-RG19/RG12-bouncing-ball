@@ -18,9 +18,14 @@ static void draw_floor();
 float animation_parameter = 0;
 int animation_ongoing = 0;
 
-float goredole = 0, levodesno = 0;
+float goredole = -16.0, levodesno = 0;
+float parametarLopta = 0;
 
 
+
+GLUquadric *qobj;
+
+void quadricsInit1();
 
 
 int main(int argc, char **argv)
@@ -44,6 +49,9 @@ int main(int argc, char **argv)
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    
+    quadricsInit1();
+    
 
     float light_position[] = {-1, 1, 1, 0};
     float light_ambient[] = {.3f, .3f, .3f, 1};
@@ -87,23 +95,30 @@ void draw_axis(float len) {
     glEnable(GL_LIGHTING);
 }
 
+void quadricsInit1(){
+    
+    qobj = gluNewQuadric();
+    gluQuadricNormals(qobj, GLU_SMOOTH);
+    
+}
+
 void on_keyboard(unsigned char key, int x, int y) {
     switch(key) {
         case 'w':
         case 'W':
-        		goredole += 0.1;      			
+        		goredole += 0.2;      			
         		break;
         case 's':
         case 'S':
-        		goredole -= 0.1;      			
+        		goredole -= 0.2;      			
         		break;
         case 'a':
         case 'A':
-        		levodesno -= 0.1;      			
+        		parametarLopta -= 3;      			
         		break;
         case 'd':
         case 'D':
-        		levodesno += 0.1;      			
+        		parametarLopta += 3;      			
         		break;
         
         case 'g':
@@ -129,6 +144,7 @@ void on_keyboard(unsigned char key, int x, int y) {
           exit(0);
           break;
     }
+    glutPostRedisplay();
 }
 
 void on_timer(int id) {
@@ -184,15 +200,43 @@ void draw_ball(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular1);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess1);
     
-
-    glutSolidSphere(0.5, 30, 30);
+    
+    glRotatef(parametarLopta, 0, 1, 0);
+	glTranslatef(0, 5, 1.9);
+    glutSolidSphere(0.3, 30, 30);
+    
+    //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);
 
     glPopMatrix();
 }
 
 void draw_floor(){
     glPushMatrix();
-/*
+
+    GLfloat ambient[] = {0.3,0.3,0.3,1};
+    GLfloat diffuse[] = {0,0.7,0,0};
+    GLfloat specular[] = {0.6,0.6,0.6,1};
+    GLfloat shininess = 80;
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+
+    
+   
+
+    glRotatef(-90,1, 0, 0);
+    gluCylinder(qobj, 1.6, 2.0, 300, 20, 20);
+
+
+
+    glPopMatrix();
+}
+
+void draw_obstacle(){
+	
+	/*
     GLdouble plane0[] = {0, 0, -1, 0};
     GLdouble plane1[] = {0, -1, 0, 0};
 
@@ -205,23 +249,22 @@ void draw_floor(){
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);
 */
-    GLfloat ambient[] = {0.3,0.3,0.3,1};
-    GLfloat diffuse[] = {0,0.7,0,0};
-    GLfloat specular[] = {0.6,0.6,0.6,1};
-    GLfloat shininess = 80;
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+	GLfloat ambient2[] = {0.3,0.3,0.3,1};
+    GLfloat diffuse2[] = {0,0.0,0,0.9};
+    GLfloat specular2[] = {0.6,0.6,0.6,1};
+    GLfloat shininess2 = 80;
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular2);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess2);
+
+	
 
 
-    glutSolidCube(3);
-
-
-
-    glPopMatrix();
 }
+
 
 
 void on_display() {
@@ -230,23 +273,16 @@ void on_display() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    /*
-    *       Animiraj kretanje kamere
-    * POCETAK STUDENTSKOG KODA
-    */
+// cos((parametarLopta*PI)/180)  sin((parametarLopta*PI)/180
 
-    gluLookAt(levodesno, goredole, 15,
-              0, 7, 0,
-              0, 1, 0);
-
-
-    /*
-    * KRAJ STUDENTSKOG KODA
-    */
+//	parametarLopta = parametarLopta * ()
+	
+	
+    gluLookAt(0, -16, 0 ,
+              0, 200, 0,
+              -cos((parametarLopta*PI)/180), 1, sin((parametarLopta*PI)/180));
 
 
-
-    
     draw_axis(5);
     glPushMatrix();
 
@@ -258,10 +294,6 @@ void on_display() {
    
     glPushMatrix();
 
-   
-
-
-        glTranslatef(0, 0, 10);
         draw_ball();
 
     glPopMatrix();
