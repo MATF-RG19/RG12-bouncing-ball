@@ -1,10 +1,17 @@
 #include <GL/glut.h>
-#include <stdio.h>
-#include <math.h>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+#include <queue>
 
 #define TIMER_INTERVAL 20
 #define TIMER_ID 0
 #define PI 3.14159265359
+
+using namespace std;
 
 static void on_display();
 static void on_reshape(int width, int height);
@@ -14,19 +21,44 @@ static void on_timer(int id);
 static void draw_axis(float len);
 static void draw_ball();
 static void draw_floor();
+void obstacles_init();
+void quadricsInit1();
+void draw_obastacles();
+
+
 
 float animation_parameter = 0;
+float translateObs = 0;
+double translation_animate = 0;
 int animation_ongoing = 0;
-
-float goredole = -16.0, levodesno = 0;
-float parametarLopta = 0;
-
-
+int faktorRot = 0;
+bool initovane_prepreke = false;
 
 GLUquadric *qobj;
 
-void quadricsInit1();
 
+struct prepreka{
+	
+	double pozx = 1.9;
+	double pozy; //dodeljuje se random
+	int pozz; //rotiranjem dobijem?
+};
+
+vector<prepreka> prepreke(400);
+
+/* KLIPING
+    GLdouble plane0[] = {0, 0, -1, 0};
+    GLdouble plane1[] = {0, -1, 0, 0};
+
+    glEnable(GL_CLIP_PLANE0);
+    glEnable(GL_CLIP_PLANE1);
+
+    glClipPlane(GL_CLIP_PLANE0, plane0);
+    glClipPlane(GL_CLIP_PLANE1, plane1);
+    
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE1);
+*/
 
 int main(int argc, char **argv)
 {
@@ -64,9 +96,20 @@ int main(int argc, char **argv)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
 
-    glClearColor(.5f, .5f, .5f, 1);
+    glClearColor(0, 0.5, 0.5, 1);
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
- 
+    
+	//if(!initovane_prepreke)
+	//{
+		obstacles_init();
+	//	initovane_prepreke = true;
+	//}
+ 	
+ 	for(int i=0; i < 400; i++)
+	{
+		cout<< prepreke[i].pozx<<" "<<prepreke[i].pozy<<" "<< prepreke[i].pozz <<endl;
+	}
+ 	
     glutMainLoop();
 
   return 0;
@@ -106,19 +149,19 @@ void on_keyboard(unsigned char key, int x, int y) {
     switch(key) {
         case 'w':
         case 'W':
-        		goredole += 0.2;      			
+        		    			
         		break;
         case 's':
         case 'S':
-        		goredole -= 0.2;      			
+        		      			
         		break;
         case 'a':
         case 'A':
-        		parametarLopta -= 3;      			
+        		faktorRot += 3;      			
         		break;
         case 'd':
         case 'D':
-        		parametarLopta += 3;      			
+        		faktorRot -= 3;      			
         		break;
         
         case 'g':
@@ -149,34 +192,31 @@ void on_keyboard(unsigned char key, int x, int y) {
 
 void on_timer(int id) {
     if (id == TIMER_ID) {
-        /*
-         *      Azuriraj animacioni parametar po potrebi
-         * POCETAK STUDENTSKOG KODA
-         */
-
-        if (animation_parameter >= 180) {
-            animation_ongoing = 0;
-            return;
-        }
-
-        animation_parameter += 1.5f;
-
-        /*
-         * KRAJ STUDENTSKOG KODA
-         */
+	
+		if(animation_ongoing){
+			//translateObs -= 1.5f;
+			
+			animation_parameter++;
+			if(animation_parameter > 90)
+			{
+				animation_parameter = 0;
+			}
+			
+			cout<< animation_parameter<<endl;
+			//ovde provera kolizije
+			//if colision tru then stani animacija ->uradi sta treba..
+			
+			
+		}
     }
 
     glutPostRedisplay();
 
-    /*
-     * POCETAK STUDENTSKOG KODA
-     */
+
     if (animation_ongoing) {
         glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
     }
-    /*
-     * KRAJ STUDENTSKOG KODA
-     */
+
 }
 
 void on_reshape(int width, int height) {
@@ -201,9 +241,10 @@ void draw_ball(){
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess1);
     
     
-    glRotatef(parametarLopta, 0, 1, 0);
-	glTranslatef(0, 5, 1.9);
+    glTranslatef(2.55, -8, 0); 
     glutSolidSphere(0.3, 30, 30);
+    
+    
     
     //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);
 
@@ -223,48 +264,70 @@ void draw_floor(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 
-    
-   
-
-    glRotatef(-90,1, 0, 0);
-    gluCylinder(qobj, 1.6, 2.0, 300, 20, 20);
-
-
-
+	 glTranslatef(0,-100, 0);
+	 glRotatef(faktorRot, 0, 1, 0);
+    glRotatef(-90, 1, 0, 0);
+    gluCylinder(qobj, 2.4, 2.0, 400, 20, 20);
+    glTranslatef(0,100, 0);
+	 //glutSolidCylinder
+	 
     glPopMatrix();
 }
 
-void draw_obstacle(){
-	
-	/*
-    GLdouble plane0[] = {0, 0, -1, 0};
-    GLdouble plane1[] = {0, -1, 0, 0};
 
-    glEnable(GL_CLIP_PLANE0);
-    glEnable(GL_CLIP_PLANE1);
+void draw_obstacle(int rot, double pomeraj){
 
-    glClipPlane(GL_CLIP_PLANE0, plane0);
-    glClipPlane(GL_CLIP_PLANE1, plane1);
-    
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-*/
+	glPushMatrix();
 
-	GLfloat ambient2[] = {0.3,0.3,0.3,1};
-    GLfloat diffuse2[] = {0,0.0,0,0.9};
-    GLfloat specular2[] = {0.6,0.6,0.6,1};
-    GLfloat shininess2 = 80;
+		GLfloat ambient2[] = {0.3,0.3,0.3,1};
+		GLfloat diffuse2[] = {1,0.0,1,0};
+		GLfloat specular2[] = {0.6,0.6,0.6,1};
+		GLfloat shininess2 = 80;
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse2);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular2);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess2);
-
-	
-
-
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient2);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse2);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular2);
+		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess2);
+				
+		glRotatef(rot, 0, 1, 0);
+		glTranslatef(1.9, pomeraj, 0); //1.9
+		glScalef(1, 1, 0.4);
+		glutSolidCube(3);
+		
+	glPopMatrix();
 }
 
+void draw_obastacles(){
+		//velicina vekt je A*B
+	for(int i=0; i < 100; i++) //A
+	{
+		for(int j= 0; j < 4; j++) //B
+		{			
+			draw_obstacle(prepreke[4*i + j].pozz, prepreke[4*i + j].pozy);			
+		}
+	}
+}
+
+
+void obstacles_init()
+{
+	srand(time(0));//NULL
+	double pomeraj = 5;
+	for(int i=0; i < 100; i++)
+	{
+		for(int j= 0; j < 1; j++)
+		{
+			int strana = rand()%4;
+			int dodatnaRot = rand()%90;
+						
+			prepreke[i].pozy = pomeraj;
+			prepreke[i].pozz = strana*90 + dodatnaRot;
+			
+			int rot = strana*90 + dodatnaRot;
+		}
+		pomeraj += rand()%3 + 4; //ispravi	
+	}
+}
 
 
 void on_display() {
@@ -272,16 +335,10 @@ void on_display() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-// cos((parametarLopta*PI)/180)  sin((parametarLopta*PI)/180
-
-//	parametarLopta = parametarLopta * ()
 	
-	
-    gluLookAt(0, -16, 0 ,
+    gluLookAt(4, -16, 0,
               0, 200, 0,
-              -cos((parametarLopta*PI)/180), 1, sin((parametarLopta*PI)/180));
-
+              0, 1, 0);
 
     draw_axis(5);
     glPushMatrix();
@@ -289,15 +346,18 @@ void on_display() {
         draw_floor();
 
     glPopMatrix();
-   
-
-   
+   	
+   draw_obastacles();
+   	
     glPushMatrix();
-
-        draw_ball();
-
+    /*	glRotatef(faktorRot, 0, 1, 0);
+		glTranslatef(0,translateObs, 0);
+      draw_obstacle(0,400);*/
     glPopMatrix();
 
+    glPushMatrix();  
+        draw_ball();
+    glPopMatrix();
 
     glutSwapBuffers();
 }

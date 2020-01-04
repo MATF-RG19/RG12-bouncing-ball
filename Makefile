@@ -1,5 +1,5 @@
 PROGRAM   = main
-CC        = gcc
+CC        = g++
 CFLAGS    = -g -Wall
 LDFLAGS   = -lGL -lGLU -lglut -lm
 
