@@ -24,12 +24,14 @@ static void draw_floor();
 void obstacles_init();
 void quadricsInit1();
 void draw_obastacles();
-
+void move_forward(double val1);
+void move_left(double val1);
+void move_right(double val1);
 
 
 float animation_parameter = 0;
 float translateObs = 0;
-double translation_animate = 0;
+double translation_animate = 0.3;
 int animation_ongoing = 0;
 int faktorRot = 0;
 bool initovane_prepreke = false;
@@ -201,11 +203,10 @@ void on_timer(int id) {
 			{
 				animation_parameter = 0;
 			}
-			
-			cout<< animation_parameter<<endl;
 			//ovde provera kolizije
 			//if colision tru then stani animacija ->uradi sta treba..
 			
+			move_forward(translation_animate);
 			
 		}
     }
@@ -227,6 +228,32 @@ void on_reshape(int width, int height) {
     gluPerspective(30, (float) width/height, 1, 1000);
 }
 
+void move_forward(double val1)
+{
+	for(int i=0; i < 100; i++)
+	{
+		prepreke[i].pozy -= val1;
+	}	
+}
+
+void move_left(double val1)
+{
+	for(int i=0; i < 100; i++)
+	{
+		prepreke[i].pozz -= val1;
+	}	
+}
+
+void move_right(double val1)
+{
+	for(int i=0; i < 100; i++)
+	{
+		prepreke[i].pozy += val1;
+	}	
+}
+
+
+
 void draw_ball(){
     glPushMatrix();
     
@@ -243,8 +270,6 @@ void draw_ball(){
     
     glTranslatef(2.55, -8, 0); 
     glutSolidSphere(0.3, 30, 30);
-    
-    
     
     //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);
 
