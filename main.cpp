@@ -25,15 +25,19 @@ void obstacles_init();
 void quadricsInit1();
 void draw_obastacles();
 void move_forward(double val1);
-void move_left(double val1);
-void move_right(double val1);
+void move_left(int val1);
+void move_right(int val1);
 
 
 float animation_parameter = 0;
 float translateObs = 0;
 double translation_animate = 0.3;
+double rotira_se_levo;
+double rotira_se_desno;
+
+double faktorRot = 0;
 int animation_ongoing = 0;
-int faktorRot = 0;
+
 bool initovane_prepreke = false;
 
 GLUquadric *qobj;
@@ -46,7 +50,7 @@ struct prepreka{
 	int pozz; //rotiranjem dobijem?
 };
 
-vector<prepreka> prepreke(400);
+vector<prepreka> prepreke(400); //smanji
 
 /* KLIPING
     GLdouble plane0[] = {0, 0, -1, 0};
@@ -159,11 +163,15 @@ void on_keyboard(unsigned char key, int x, int y) {
         		break;
         case 'a':
         case 'A':
-        		faktorRot += 3;      			
+        		faktorRot += 0.3; 
+        		rotira_se_levo = 1;
+        		rotira_se_desno = 0;    			
         		break;
         case 'd':
         case 'D':
-        		faktorRot -= 3;      			
+        		faktorRot -= 0.3;
+        		rotira_se_levo = 0;
+        		rotira_se_desno = 1;
         		break;
         
         case 'g':
@@ -206,16 +214,21 @@ void on_timer(int id) {
 			//ovde provera kolizije
 			//if colision tru then stani animacija ->uradi sta treba..
 			
-			move_forward(translation_animate);
-			
+			move_forward(translation_animate);			
 		}
+		
+		if(rotira_se_levo == 1 && rotira_se_desno == 0)
+			move_left(1); //param_left
+		else
+			move_right(1);
+		
+		
     }
 
     glutPostRedisplay();
 
-
     if (animation_ongoing) {
-        glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
+        glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);      
     }
 
 }
@@ -236,20 +249,20 @@ void move_forward(double val1)
 	}	
 }
 
-void move_left(double val1)
+void move_left(int val1)
 {
 	for(int i=0; i < 100; i++)
 	{
-		prepreke[i].pozz -= val1;
+		prepreke[i].pozz = (prepreke[i].pozz + val1)%360;
 	}	
 }
 
-void move_right(double val1)
+void move_right(int val1)
 {
 	for(int i=0; i < 100; i++)
 	{
-		prepreke[i].pozy += val1;
-	}	
+		prepreke[i].pozz = (prepreke[i].pozz - val1)%360;
+	}
 }
 
 
@@ -325,11 +338,11 @@ void draw_obstacle(int rot, double pomeraj){
 void draw_obastacles(){
 		//velicina vekt je A*B
 	for(int i=0; i < 100; i++) //A
-	{
+	{/*
 		for(int j= 0; j < 4; j++) //B
-		{			
-			draw_obstacle(prepreke[4*i + j].pozz, prepreke[4*i + j].pozy);			
-		}
+		{*/			
+			draw_obstacle(prepreke[i].pozz, prepreke[i].pozy);			
+		/*}*/
 	}
 }
 
@@ -340,13 +353,13 @@ void obstacles_init()
 	double pomeraj = 5;
 	for(int i=0; i < 100; i++)
 	{
-		for(int j= 0; j < 1; j++)
+		for(int j= 0; j < 2; j++)
 		{
 			int strana = rand()%4;
 			int dodatnaRot = rand()%90;
 						
-			prepreke[i].pozy = pomeraj;
-			prepreke[i].pozz = strana*90 + dodatnaRot;
+			prepreke[2*i + j].pozy = pomeraj;
+			prepreke[2*i + j].pozz = strana*90 + dodatnaRot;
 			
 			int rot = strana*90 + dodatnaRot;
 		}
