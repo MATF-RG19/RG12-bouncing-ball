@@ -25,18 +25,23 @@ void obstacles_init();
 void quadricsInit1();
 void draw_obastacles();
 void move_forward(double val1);
-void move_left(int val1);
-void move_right(int val1);
+void move_left(double val1);
+void move_right(double val1);
 
 
-float animation_parameter = 0;
-float translateObs = 0;
 double translation_animate = 0.3;
+double translation_rotate = 1;
 double rotira_se_levo;
 double rotira_se_desno;
-
+double faktor_ubrzanja = 0;
+double faktor_skretanja = 0;
 double faktorRot = 0;
+
+int broj_prepreka = 100;
+
+
 int animation_ongoing = 0;
+int animation_parameter = 0;
 
 bool initovane_prepreke = false;
 
@@ -45,12 +50,12 @@ GLUquadric *qobj;
 
 struct prepreka{
 	
-	double pozx = 1.9;
+	double pozx = 1.2;
 	double pozy; //dodeljuje se random
-	int pozz; //rotiranjem dobijem?
+	double pozz; //rotiranjem dobijem?
 };
 
-vector<prepreka> prepreke(400); //smanji
+vector<prepreka> prepreke(broj_prepreka); //smanji
 
 /* KLIPING
     GLdouble plane0[] = {0, 0, -1, 0};
@@ -91,7 +96,7 @@ int main(int argc, char **argv)
     quadricsInit1();
     
 
-    float light_position[] = {-1, 1, 1, 0};
+    float light_position[] = {1, 1, 1, 0};
     float light_ambient[] = {.3f, .3f, .3f, 1};
     float light_diffuse[] = {.7f, .7f, .7f, 1};
     float light_specular[] = {.7f, .7f, .7f, 1};
@@ -105,13 +110,10 @@ int main(int argc, char **argv)
     glClearColor(0, 0.5, 0.5, 1);
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
     
-	//if(!initovane_prepreke)
-	//{
-		obstacles_init();
-	//	initovane_prepreke = true;
-	//}
+
+	obstacles_init();
  	
- 	for(int i=0; i < 400; i++)
+ 	for(int i=0; i < broj_prepreka; i++)
 	{
 		cout<< prepreke[i].pozx<<" "<<prepreke[i].pozy<<" "<< prepreke[i].pozz <<endl;
 	}
@@ -204,25 +206,27 @@ void on_timer(int id) {
     if (id == TIMER_ID) {
 	
 		if(animation_ongoing){
-			//translateObs -= 1.5f;
-			
+	
 			animation_parameter++;
-			if(animation_parameter > 90)
-			{
-				animation_parameter = 0;
-			}
+		if(animation_parameter%300 == 0)       //koliko cesto se ubrzava
+		{		faktor_ubrzanja += 0.05;         // ovde se igrica ubrzava
+				translation_rotate += 0.1;			//srazmerno povecati i brzinu rotacije
+		}													//u move left i move right
+	
+				
 			//ovde provera kolizije
-			//if colision tru then stani animacija ->uradi sta treba..
+			//if colision tru then stani animacija -> uradi sta treba..
 			
-			move_forward(translation_animate);			
+			
 		}
 		
+		
+		move_forward(translation_animate + faktor_ubrzanja);
+		
 		if(rotira_se_levo == 1 && rotira_se_desno == 0)
-			move_left(1); //param_left
+			move_left(translation_rotate); //param_left
 		else
-			move_right(1);
-		
-		
+			move_right(translation_rotate);	
     }
 
     glutPostRedisplay();
@@ -238,30 +242,35 @@ void on_reshape(int width, int height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(30, (float) width/height, 1, 1000);
+    gluPerspective(30, (float) width/height, 1, 500);
 }
 
 void move_forward(double val1)
 {
-	for(int i=0; i < 100; i++)
+	for(int i=0; i < broj_prepreka; i++)
 	{
 		prepreke[i].pozy -= val1;
 	}	
 }
 
-void move_left(int val1)
+void move_left(double val1)
 {
-	for(int i=0; i < 100; i++)
+	for(int i=0; i < broj_prepreka; i++)
 	{
-		prepreke[i].pozz = (prepreke[i].pozz + val1)%360;
+		
+		prepreke[i].pozz = (prepreke[i].pozz + val1); //pazi
+		if(prepreke[i].pozz > 360)
+			prepreke[i].pozz -= 360; // =0
 	}	
 }
 
-void move_right(int val1)
+void move_right(double val1)
 {
-	for(int i=0; i < 100; i++)
+	for(int i=0; i < broj_prepreka; i++)
 	{
-		prepreke[i].pozz = (prepreke[i].pozz - val1)%360;
+		prepreke[i].pozz = (prepreke[i].pozz - val1); //pazi
+		if(prepreke[i].pozz < 0)
+			prepreke[i].pozz += 360; // =360
 	}
 }
 
@@ -280,9 +289,16 @@ void draw_ball(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular1);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess1);
     
-    
+    /*
+    glPushMatrix();
+     	glRotatef(0, 0, 1, 0);
+		glTranslatef(1.2, -6.2, 0); // 0.75 je min visina za x koord
+		glScalef(3, 3, 1.2);
+		glutSolidCube(1);
+    glPopMatrix();*/
     glTranslatef(2.55, -8, 0); 
     glutSolidSphere(0.3, 30, 30);
+    
     
     //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);
 
@@ -313,7 +329,7 @@ void draw_floor(){
 }
 
 
-void draw_obstacle(int rot, double pomeraj){
+void draw_obstacle(int rot, double pomeraj, double visina){
 
 	glPushMatrix();
 
@@ -328,42 +344,49 @@ void draw_obstacle(int rot, double pomeraj){
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess2);
 				
 		glRotatef(rot, 0, 1, 0);
-		glTranslatef(1.9, pomeraj, 0); //1.9
-		glScalef(1, 1, 0.4);
-		glutSolidCube(3);
+		glTranslatef(visina, pomeraj, 0); // 0.75 je min visina za x koord
+		glScalef(3, 3, 1.2);
+		glutSolidCube(1);
+		//glutWireCube(3);
 		
 	glPopMatrix();
 }
 
 void draw_obastacles(){
 		//velicina vekt je A*B
-	for(int i=0; i < 100; i++) //A
-	{/*
-		for(int j= 0; j < 4; j++) //B
-		{*/			
-			draw_obstacle(prepreke[i].pozz, prepreke[i].pozy);			
-		/*}*/
+	for(int i=0; i < broj_prepreka; i++) //A
+	{	
+		if((prepreke[i].pozz >= 0 && prepreke[i].pozz <=20 
+		|| (prepreke[i].pozz >= 340 && prepreke[i].pozz <360))
+		 && (prepreke[i].pozy >= (-9.8 ) && prepreke[i].pozy <= (-5.2)))
+		{
+			animation_ongoing = 0;
+			cout<< "Kolizija"<<endl;
+		}
+			
+		draw_obstacle(prepreke[i].pozz, prepreke[i].pozy, prepreke[i].pozx);
 	}
+	
 }
 
 
 void obstacles_init()
 {
 	srand(time(0));//NULL
-	double pomeraj = 5;
-	for(int i=0; i < 100; i++)
+	double pomeraj = 9;
+	for(int i=0; i < broj_prepreka/4; i++)
 	{
-		for(int j= 0; j < 2; j++)
+		for(int j = 0; j < 4; j++)
 		{
-			int strana = rand()%4;
+			int strana = rand()%4+1;
 			int dodatnaRot = rand()%90;
 						
-			prepreke[2*i + j].pozy = pomeraj;
-			prepreke[2*i + j].pozz = strana*90 + dodatnaRot;
+			prepreke[4*i + j].pozy = pomeraj;
+			prepreke[4*i + j].pozz = j*90 + dodatnaRot; //strana	
 			
 			int rot = strana*90 + dodatnaRot;
 		}
-		pomeraj += rand()%3 + 4; //ispravi	
+		pomeraj += rand()%3 + 9; //ispravi	
 	}
 }
 
@@ -384,14 +407,13 @@ void on_display() {
         draw_floor();
 
     glPopMatrix();
+    
+   /* glPushMatrix();
+    	draw_obstacle(7, -5, 1);
+    glPopMatrix();*/
    	
-   draw_obastacles();
-   	
-    glPushMatrix();
-    /*	glRotatef(faktorRot, 0, 1, 0);
-		glTranslatef(0,translateObs, 0);
-      draw_obstacle(0,400);*/
-    glPopMatrix();
+    draw_obastacles();
+
 
     glPushMatrix();  
         draw_ball();
