@@ -63,19 +63,6 @@ struct prepreka{
 
 vector<prepreka> prepreke(broj_prepreka); //smanji
 
-/* KLIPING
-    GLdouble plane0[] = {0, 0, -1, 0};
-    GLdouble plane1[] = {0, -1, 0, 0};
-
-    glEnable(GL_CLIP_PLANE0);
-    glEnable(GL_CLIP_PLANE1);
-
-    glClipPlane(GL_CLIP_PLANE0, plane0);
-    glClipPlane(GL_CLIP_PLANE1, plane1);
-    
-    glDisable(GL_CLIP_PLANE0);
-    glDisable(GL_CLIP_PLANE1);
-*/
 
 int main(int argc, char **argv)
 {
@@ -102,7 +89,7 @@ int main(int argc, char **argv)
     quadricsInit1();
     
 
-    float light_position[] = {1, 1, 1, 0};
+    float light_position[] = {10,10, 10, 1};
     float light_ambient[] = {.3f, .3f, .3f, 1};
     float light_diffuse[] = {.7f, .7f, .7f, 1};
     float light_specular[] = {.7f, .7f, .7f, 1};
@@ -113,7 +100,7 @@ int main(int argc, char **argv)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
 
-    glClearColor(0, 0.5, 0.5, 1);
+    glClearColor(0.24, 0.53, 0.77, 1);
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
     
 
@@ -281,7 +268,7 @@ void draw_ball(){
     glPushMatrix();
     
     GLfloat ambient1[] = {0.3,0.3,0.3,1};
-    GLfloat diffuse1[] = {0.7,0.0,0,0};
+    GLfloat diffuse1[] = { 0.24, 0.53, 0.77, 0}; //0.67,0.76,0.65,0
     GLfloat specular1[] = {0.6,0.6,0.6,1};
     GLfloat shininess1 = 80;
 
@@ -310,7 +297,7 @@ void draw_floor(){
     glPushMatrix();
 
     GLfloat ambient[] = {0.3,0.3,0.3,1};
-    GLfloat diffuse[] = {0,0.7,0,0};
+    GLfloat diffuse[] = {1,0.7,0,0};
     GLfloat specular[] = {0.6,0.6,0.6,1};
     GLfloat shininess = 80;
 
@@ -331,7 +318,7 @@ void draw_floor(){
 
 void obstacle_renew()
 {		
-	if(prepreke[index].pozy < -9)
+	if(prepreke[index].pozy < -13)
 	{
 		double MaxUdaljenost = prepreke[pozmax].pozy + rand()%3 + 9;
 		
@@ -354,8 +341,8 @@ void draw_obstacle(int rot, double pomeraj, double visina){
 
 	glPushMatrix();
 
-		GLfloat ambient2[] = {0.3,0.3,0.3,1};
-		GLfloat diffuse2[] = {1,0.0,1,0};
+		GLfloat ambient2[] = {0.4,0.4,0.4,1};
+		GLfloat diffuse2[] = {1,0.0,0,0};
 		GLfloat specular2[] = {0.6,0.6,0.6,1};
 		GLfloat shininess2 = 80;
 
@@ -417,7 +404,7 @@ void on_display() {
               0, 200, 0,
               0, 1, 0);
 
-    draw_axis(5);
+    //draw_axis(5);
     glPushMatrix();
 
         draw_floor();
@@ -430,8 +417,8 @@ void on_display() {
    	
     draw_obastacles();
 
-
-    glPushMatrix();  
+    glPushMatrix();
+    	//napisi rotaciju lopte
         draw_ball();
     glPopMatrix();
 
