@@ -27,6 +27,7 @@ void draw_obastacles();
 void move_forward(double val1);
 void move_left(double val1);
 void move_right(double val1);
+void obstacle_renew();
 
 
 double translation_animate = 0.3;
@@ -38,6 +39,11 @@ double faktor_skretanja = 0;
 double faktorRot = 0;
 
 int broj_prepreka = 100;
+
+int index = 0;
+int pozmax = broj_prepreka - 1;
+
+int strana = 0;
 
 
 int animation_ongoing = 0;
@@ -204,22 +210,18 @@ void on_keyboard(unsigned char key, int x, int y) {
 
 void on_timer(int id) {
     if (id == TIMER_ID) {
-	
 		if(animation_ongoing){
 	
 			animation_parameter++;
-		if(animation_parameter%300 == 0)       //koliko cesto se ubrzava
-		{		faktor_ubrzanja += 0.05;         // ovde se igrica ubrzava
-				translation_rotate += 0.1;			//srazmerno povecati i brzinu rotacije
-		}													//u move left i move right
-	
-				
-			//ovde provera kolizije
-			//if colision tru then stani animacija -> uradi sta treba..
-			
+			if(animation_parameter%1600 == 0)       //koliko cesto se ubrzava
+			{		
+				faktor_ubrzanja += 0.05;         // ovde se igrica ubrzava
+				translation_rotate += 0.1;		//srazmerno povecati i brzinu rotacije
+			}									//u move left i move right		
 			
 		}
 		
+		obstacle_renew();
 		
 		move_forward(translation_animate + faktor_ubrzanja);
 		
@@ -275,7 +277,6 @@ void move_right(double val1)
 }
 
 
-
 void draw_ball(){
     glPushMatrix();
     
@@ -328,6 +329,26 @@ void draw_floor(){
     glPopMatrix();
 }
 
+void obstacle_renew()
+{		
+	if(prepreke[index].pozy < -9)
+	{
+		double MaxUdaljenost = prepreke[pozmax].pozy + rand()%3 + 9;
+		
+		for(int j = 0; j < 4; j++)
+		{
+			int dodatnaRot = rand()%90;
+						
+			prepreke[index + j].pozy = MaxUdaljenost;;
+			prepreke[index + j].pozz = j*90 + dodatnaRot; //rotacija
+		}
+		index += 4; pozmax = index-1;
+		if(index == broj_prepreka){		
+			index = 0;
+			pozmax = broj_prepreka - 1;	
+		}
+	}
+}
 
 void draw_obstacle(int rot, double pomeraj, double visina){
 
@@ -366,9 +387,7 @@ void draw_obastacles(){
 			
 		draw_obstacle(prepreke[i].pozz, prepreke[i].pozy, prepreke[i].pozx);
 	}
-	
 }
-
 
 void obstacles_init()
 {
@@ -378,15 +397,12 @@ void obstacles_init()
 	{
 		for(int j = 0; j < 4; j++)
 		{
-			int strana = rand()%4+1;
 			int dodatnaRot = rand()%90;
 						
 			prepreke[4*i + j].pozy = pomeraj;
-			prepreke[4*i + j].pozz = j*90 + dodatnaRot; //strana	
-			
-			int rot = strana*90 + dodatnaRot;
+			prepreke[4*i + j].pozz = j*90 + dodatnaRot; //rotacija
 		}
-		pomeraj += rand()%3 + 9; //ispravi	
+		pomeraj += rand()%3 + 9; //podesi
 	}
 }
 
