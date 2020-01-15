@@ -55,7 +55,7 @@ int animation_ongoing = 0;
 int animation_parameter = 0;
 
 bool initovane_prepreke = false;
-bool blink_ball = false;
+bool temp = false;
 
 GLUquadric *qobj;
 
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     quadricsInit1();
     
 
-    float light_position[] = {10, 10, 10, 0};
+    float light_position[] = {10, 10, 10, 0}; //10 10 10 0
     float light_ambient[] = {.3f, .3f, .3f, 1};
     float light_diffuse[] = {.7f, .7f, .7f, 1};
     float light_specular[] = {.7f, .7f, .7f, 1};
@@ -194,6 +194,7 @@ void on_keyboard(unsigned char key, int x, int y) {
         case 'r':
         case 'R': //popravi ne radi lepo
             animation_parameter = 0;
+            animation_ongoing = 0;
             faktor_ubrzanja = 0;
             translation_rotate = 1;
             health = 3;
@@ -218,11 +219,11 @@ void on_timer(int id) {
 		if(animation_ongoing){
 	
 			animation_parameter++;
-			if(animation_parameter%1000 == 0)       //koliko cesto se ubrzava
+			if(animation_parameter%1000 == 0)   //koliko cesto se ubrzava
 			{		
 				faktor_ubrzanja += 0.05;         // ovde se igrica ubrzava
-				translation_rotate += 0.1;		//srazmerno povecati i brzinu rotacije
-			}									//u move left i move right		
+				translation_rotate += 0.1;			//srazmerno povecati i brzinu rotacije
+			}												//u move left i move right		
 			
 		}
 		
@@ -287,8 +288,6 @@ void move_right(double val1)
 
 void draw_ball(){
     glPushMatrix();
-    
-    //printf("LOPTA");
 
     GLfloat diffuse1[] = { 0.24, 0.53, 0.77, 0};
     GLfloat ambient1[] = {0.3,0.3,0.3,1};
@@ -306,11 +305,11 @@ void draw_ball(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse1);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular1);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess1);
+
     
     glTranslatef(2.55, -8, 0);
     glRotatef((4* animation_parameter)%360, 0, 0, 1);
     glutSolidSphere(0.3, 50, 50);
-    
     
     //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);
 
@@ -396,7 +395,7 @@ void draw_obstacles(){
             {
                 max_param = animation_parameter;
                 health--;
-                
+
                 if(health < 1) animation_ongoing = 0;
 
                 cout<< animation_parameter <<endl;
@@ -404,10 +403,10 @@ void draw_obstacles(){
         }
         else if(max_param + 50 <= animation_parameter){
             max_param = -1;
-            blink_ball = false; //ovaj deo
+             
         }
-        else{                   //ovaj deo
-            blink_ball = true; 
+        else{ 
+
         }
 
 		draw_obstacle(prepreke[i].pozz, prepreke[i].pozy, prepreke[i].pozx);
@@ -462,11 +461,15 @@ void on_display() {
    	
     draw_obstacles();
 
-    glPushMatrix();
-    	//napisi rotaciju lopte
-        draw_ball();
-    glPopMatrix();
+    /*
+    temp = true;
+    if(max_param != -1)
+    {
+        temp = (animation_parameter / 10) % 2;
+    }
+    if(temp == true)*/
+        draw_ball;
+
 
     glutSwapBuffers();
 }
-
