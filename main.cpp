@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     quadricsInit1();
     
 
-    float light_position[] = {10, 10, 10, 0}; //10 10 10 0
+    float light_position[] = {10,10, 10, 0}; //10 10 10 0 ~ maddness 4, -16, 0, 0
     float light_ambient[] = {.3f, .3f, .3f, 1};
     float light_diffuse[] = {.7f, .7f, .7f, 1};
     float light_specular[] = {.7f, .7f, .7f, 1};
@@ -199,7 +199,8 @@ void on_keyboard(unsigned char key, int x, int y) {
             translation_rotate = 1;
             health = 3;
             index = 0;
-			pozmax = broj_prepreka - 1;	
+			pozmax = broj_prepreka - 1;
+            max_param = -1; //proveravanje kolizije se vraca na default
             obstacle_renew();
             obstacles_init();
             glutPostRedisplay();
@@ -461,14 +462,13 @@ void on_display() {
    	
     draw_obstacles();
 
-    /*
     temp = true;
     if(max_param != -1)
     {
-        temp = (animation_parameter / 10) % 2;
+        temp = (animation_parameter / 8) % 2;
     }
-    if(temp == true)*/
-        draw_ball;
+    if(temp == true)
+        draw_ball();
 
 
     glutSwapBuffers();
