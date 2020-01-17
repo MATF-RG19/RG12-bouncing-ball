@@ -182,7 +182,7 @@ void on_keyboard(unsigned char key, int x, int y) {
         
         case 'g':
         case 'G':
-            if (!animation_ongoing) {
+            if (!animation_ongoing && health > 0) {
                 animation_ongoing = 1;
                 glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
             }
