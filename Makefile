@@ -1,21 +1,11 @@
-PROGRAM   = main
-CC        = g++
-CFLAGS    = -g -Wall
-LDFLAGS   = -lGL -lGLU -lglut -lm
 
-$(PROGRAM): main.o
-	$(CC) -o $(PROGRAM) main.o $(LDFLAGS)
+PROGRAM = BouncingBall
+CC	= g++
+LDLIBS  = -lglut -lGLU -lGL -lm
 
-.PHONY: clean dist
-
-clean:
-	-rm -f *.o $(PROGRAM) *core
-
-dist: clean
-	-tar -chvj -C .. -f ../$(PROGRAM).tar.bz2 $(PROGRAM)
-
-
-
-
-run:
-	./$(PROGRAM)
+$(PROGRAM): header.o main.o
+	$(CC) -o $(PROGRAM) $^ $(LDLIBS)
+header.o: header.cpp header.h
+	$(CC) -c -o $@ $<
+main.o: main.cpp header.h
+	$(CC) -c -o $@ $<
