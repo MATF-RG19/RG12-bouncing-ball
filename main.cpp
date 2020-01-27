@@ -61,7 +61,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-
-/*
- *POMOCNA FUNKCIJA ZA ISCRTAVANJE KOODINATNOG SISTEMA
- */

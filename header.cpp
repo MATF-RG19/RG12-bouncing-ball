@@ -12,29 +12,28 @@
 #include <queue>
 #include <string>
 
-#include "image.c"
+#include "image.c" //
 
 #define FILENAME0 "wall.bmp"
 #define FILENAME1 "door.bmp"
 
 using namespace std;
 
-static char buffer[30];
+static char buffer[30];                     //Bafer za ispis teksta na ekranu
 static GLuint names[2];
 
-static double translation_animate = 0.3;
-static double translation_rotate = 1;
-static double rotira_se_levo;
-static double rotira_se_desno;
-static double faktor_ubrzanja = 0;
-static double faktor_skretanja = 0;
-static double faktor_rot = 0; //
+static double translation_animate = 0.3;    //Konstanta kojom pomeram prepreke napred
+static double translation_rotate = 1;       //Faktor skretanja prepreka - uvecava se sa vremenom
+static double rotira_se_levo;               //Flagovi komandi skretanja
+static double rotira_se_desno;              // --||--
+static double faktor_ubrzanja = 0;          //Faktor ubrzanja prepreka ka igracu        
+static double faktor_rot = 0;               // Faktor rotacije valjka [0 - 360] - uvecava se sa vremenom
 
-static int broj_prepreka = 100;
+static int broj_prepreka = 100;             //Self expl...
 static int health = 3;
-static int max_param = -1;
-static int index = 0;
-static int pozmax = broj_prepreka - 1;
+static int max_param = -1;                  //Ovom promenjljivom kontrolisem respawn immunity (pamti vreme kolizije, inace -1)
+static int index = 0;                       //Ovo ce biti indeks prepreke u nizu koja je "u fokusu"
+static int pozmax = broj_prepreka - 1;      //Posto indeks moze da iskoci izvan opsega, pamtim pozmax
 
 static int strana = 0;
 
@@ -42,22 +41,21 @@ static int strana = 0;
 static int animation_ongoing = 0;
 static int animation_parameter = 0;
 
-static bool initovane_prepreke = false;
 static bool temp = false;
 
-static GLUquadric *qobj;
+static GLUquadric *qobj;                    //Pok na valjak (strukt || klasa)
 
 
-struct prepreka{
+struct prepreka{                            //Koordinate pojedinacne prepreke
 	
-	double pozx = 1.2;
-	double pozy; //
-	double pozz; //
+	double pozx = 1.2;                      //Visina prepreke
+	double pozy;                            //Udaljenost prepreke
+	double pozz;                            // [0 - 360]  ~ pozz je zapravo kao faktor rotacije a ne z koordinata 
 };
 
 static vector<prepreka> prepreke(broj_prepreka); //smanji
 
-void draw_axis(float len) {
+void draw_axis(float len) {  /* Iscrtavamo koordinatni sistem */
     glDisable(GL_LIGHTING);
 
     glBegin(GL_LINES);
@@ -77,14 +75,14 @@ void draw_axis(float len) {
     glEnable(GL_LIGHTING);
 }
 
-void quadricsInit1(){
+void quadricsInit1(){                   //Initujemo valjak
     
     qobj = gluNewQuadric();
     gluQuadricNormals(qobj, GLU_SMOOTH);
     
 }
 
-void text_log( float x, float z, const char *s)
+void text_log( float x, float z, const char *s)  //Funkcija za ispisivanje teksta, preuzeto sa drugog projekta
 {
     glDisable(GL_LIGHT0);
 
@@ -106,37 +104,37 @@ void on_keyboard(unsigned char key, int x, int y) {
         		      			
         		break;
         case 'a':
-        case 'A':
+        case 'A':                       //Ako 'A' onda ukljuci flag LEVO
         		rotira_se_levo = 1;
         		rotira_se_desno = 0;    			
         		break;
         case 'd':
-        case 'D':
+        case 'D':                       //Ako 'D' onda ukljuci flag DESNO
         		rotira_se_levo = 0;
         		rotira_se_desno = 1;
         		break;
         
         case 'g':
-        case 'G':
+        case 'G':                       //Pokeni animaciju
             if (!animation_ongoing && health > 0) {
                 animation_ongoing = 1;
                 glutTimerFunc(TIMER_INTERVAL, on_timer, TIMER_ID);
             }
             break;
         case 'p':
-        case 'P':
+        case 'P':                       //Pauziraj animaciju
             animation_ongoing = 0;
             break;
         case 'r':
-        case 'R': 
-            animation_parameter = 0;
+        case 'R':                      //Ehh... Resetuj animaciju. Vrati hp na 3, index prepreke u fokusu i ostali init (zbog pravilnog redosleda)
+            animation_parameter = 0;   //Takodje, vrati tezinu igrice na pocetnu
             animation_ongoing = 0;
             faktor_ubrzanja = 0;
             translation_rotate = 1;
             health = 3;
             index = 0;
 			pozmax = broj_prepreka - 1;
-            max_param = -1; //proveravanje kolizije se vraca na default
+            max_param = -1;            //proveravanje kolizije se vraca na default
             obstacle_renew();
             obstacles_init();
             glutPostRedisplay();
@@ -168,11 +166,10 @@ void on_timer(int id) {
 		
 		move_forward(translation_animate + faktor_ubrzanja);
 
-		//dodati W za pravo?
 		if(rotira_se_levo == 1 && rotira_se_desno == 0)
         {
             move_left(translation_rotate);
-            faktor_rot += translation_rotate;
+            faktor_rot += translation_rotate;  /*Ovde podesavam rotaciju valjka da bude ista kao i rotacija prepreka oko Y ose*/
             if(faktor_rot > 360)
 			    faktor_rot -= 360;
             
@@ -181,7 +178,7 @@ void on_timer(int id) {
 		else
         {
             move_right(translation_rotate);
-            faktor_rot -= translation_rotate;
+            faktor_rot -= translation_rotate; /*Ovde podesavam rotaciju valjka da bude ista kao i rotacija prepreka oko Y ose*/
             if(faktor_rot < 0)
 			    faktor_rot += 360;
         }
@@ -204,7 +201,7 @@ void on_reshape(int width, int height) {
     gluPerspective(30, (float) width/height, 1, 500);
 }
 
-void move_forward(double val1)
+void move_forward(double val1)              //Prodje kroz niz prepreka i smanji Y koord tako da kad se iscrtavaju, budu blize igracu
 {
 	for(int i=0; i < broj_prepreka; i++)
 	{
@@ -212,24 +209,23 @@ void move_forward(double val1)
 	}	
 }
 
-void move_left(double val1)
+void move_left(double val1)                 //Prodje kroz niz prepreka i podesava ROTACIJU
 {
 	for(int i=0; i < broj_prepreka; i++)
 	{
-		
-		prepreke[i].pozz = (prepreke[i].pozz + val1); //pazi
+		prepreke[i].pozz = (prepreke[i].pozz + val1);
 		if(prepreke[i].pozz > 360)
-			prepreke[i].pozz -= 360; // =0
+			prepreke[i].pozz -= 360;
 	}	
 }
 
-void move_right(double val1)
+void move_right(double val1)                //Prodje kroz niz prepreka i podesava ROTACIJU
 {
 	for(int i=0; i < broj_prepreka; i++)
 	{
-		prepreke[i].pozz = (prepreke[i].pozz - val1); //pazi
+		prepreke[i].pozz = (prepreke[i].pozz - val1);
 		if(prepreke[i].pozz < 0)
-			prepreke[i].pozz += 360; // =360
+			prepreke[i].pozz += 360;
 	}
 }
 
@@ -241,7 +237,7 @@ void draw_ball(){
     GLfloat ambient1[] = {0.3,0.3,0.3,1};
     GLfloat specular1[] = {0.6,0.6,0.6,1};
     GLfloat shininess1 = 80;
-    /*
+    /*                                                   //Pokusaj sarenog blinkanja, odlicio se za drugi efekat
     if(blink_ball){
         srand(time(NULL));
         diffuse1[0] = rand()%11/10.0;
@@ -257,11 +253,11 @@ void draw_ball(){
     
     glTranslatef(2.55, -8, 0);
     glRotatef((4* animation_parameter)%360, 0, 0, 1);
-   //glBindTexture(GL_TEXTURE_2D, names[0]); //Ukljucuje se textura
+   //glBindTexture(GL_TEXTURE_2D, names[0]);            //Ukljucuje se textura
     glutSolidSphere(0.3, 50, 50);
-   //glBindTexture(GL_TEXTURE_2D, 0); //Iskljucuje
+   //glBindTexture(GL_TEXTURE_2D, 0);                   //Iskljucuje se tekstura
     
-    //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);
+    //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);          //Moze i ovakav cilindar
     glPopMatrix();
 }
 
@@ -283,7 +279,7 @@ void draw_floor(){
 	 glTranslatef(0,-100, 0);
 	 glRotatef(faktor_rot, 0, 1, 0);
     glRotatef(-90, 1, 0, 0);
-    gluQuadricDrawStyle(qobj, GLU_FILL); //Nesto ne znam sta radi
+    gluQuadricDrawStyle(qobj, GLU_FILL); //
     gluCylinder(qobj, 2.4, 2.0, 400, 20, 20);
     gluQuadricTexture(qobj, GL_TRUE); //Nesto drugo
     glTranslatef(0,100, 0);
