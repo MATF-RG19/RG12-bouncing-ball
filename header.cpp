@@ -107,13 +107,11 @@ void on_keyboard(unsigned char key, int x, int y) {
         		break;
         case 'a':
         case 'A':
-        		faktor_rot += 3; 
         		rotira_se_levo = 1;
         		rotira_se_desno = 0;    			
         		break;
         case 'd':
         case 'D':
-        		faktor_rot -= 3;
         		rotira_se_levo = 0;
         		rotira_se_desno = 1;
         		break;
@@ -130,7 +128,7 @@ void on_keyboard(unsigned char key, int x, int y) {
             animation_ongoing = 0;
             break;
         case 'r':
-        case 'R': //popravi ne radi lepo
+        case 'R': 
             animation_parameter = 0;
             animation_ongoing = 0;
             faktor_ubrzanja = 0;
@@ -143,9 +141,7 @@ void on_keyboard(unsigned char key, int x, int y) {
             obstacles_init();
             glutPostRedisplay();
             break;
-        /*
-         * KRAJ STUDENTSKOG KODA
-         */
+
         case 27:
           exit(0);
           break;
@@ -174,9 +170,22 @@ void on_timer(int id) {
 
 		//dodati W za pravo?
 		if(rotira_se_levo == 1 && rotira_se_desno == 0)
-			move_left(translation_rotate); //param_left
+        {
+            move_left(translation_rotate);
+            faktor_rot += translation_rotate;
+            if(faktor_rot > 360)
+			    faktor_rot -= 360;
+            
+        }
+			
 		else
-			move_right(translation_rotate);	
+        {
+            move_right(translation_rotate);
+            faktor_rot -= translation_rotate;
+            if(faktor_rot < 0)
+			    faktor_rot += 360;
+        }
+			
     }
 
     glutPostRedisplay();
@@ -269,10 +278,6 @@ void draw_floor(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 
-   /* if (rotira_se_levo)
-        faktor_rot+=1;
-    if (rotira_se_desno)
-        faktor_rot-=1;*/
     glBindTexture(GL_TEXTURE_2D,names[1]); //Ukljucje texturu
 
 	 glTranslatef(0,-100, 0);
