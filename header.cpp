@@ -154,9 +154,9 @@ void on_timer(int id) {
 			animation_parameter++;
 			if(animation_parameter%1000 == 0)   //koliko cesto se ubrzava
 			{		
-				faktor_ubrzanja += 0.05;         // ovde se igrica ubrzava
-				translation_rotate += 0.1;			//srazmerno povecati i brzinu rotacije
-			}												//u move left i move right		
+				faktor_ubrzanja += 0.05;        // ovde se igrica ubrzava
+				translation_rotate += 0.1;		//srazmerno povecati i brzinu rotacije
+			}									//u move left i move right		
 			
 		}
 		
@@ -261,7 +261,7 @@ void draw_ball(){
     glPopMatrix();
 }
 
-void draw_floor(){
+void draw_floor(){                          //Crtamo valjak
     glPushMatrix();
 
     GLfloat ambient[] = {0.3,0.3,0.3,1};
@@ -274,33 +274,33 @@ void draw_floor(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 
-    glBindTexture(GL_TEXTURE_2D,names[1]); //Ukljucje texturu
+    glBindTexture(GL_TEXTURE_2D,names[1]);      //Ukljucje texturu
 
-	 glTranslatef(0,-100, 0);
-	 glRotatef(faktor_rot, 0, 1, 0);
-    glRotatef(-90, 1, 0, 0);
-    gluQuadricDrawStyle(qobj, GLU_FILL); //
-    gluCylinder(qobj, 2.4, 2.0, 400, 20, 20);
-    gluQuadricTexture(qobj, GL_TRUE); //Nesto drugo
+	glTranslatef(0,-100, 0);
+	glRotatef(faktor_rot, 0, 1, 0);             //Ovde ga rotiramo paralelno sa preprekama
+    glRotatef(-90, 1, 0, 0);                    //Polazemo prethodno uspravan valjak
+    gluQuadricDrawStyle(qobj, GLU_FILL);   
+    gluCylinder(qobj, 2.4, 2.0, 400, 20, 20);   //Iscrtavamo valjak
+    gluQuadricTexture(qobj, GL_TRUE);
     glTranslatef(0,100, 0);
-	 //glutSolidCylinder 
-     glBindTexture(GL_TEXTURE_2D,0); //Iskljucuje
+
+    glBindTexture(GL_TEXTURE_2D,0);             //Iskljucuje -
     glPopMatrix();
 
 }
 
-void obstacle_renew()
+void obstacle_renew()                           //Ovom funkcijom prvu prepreku koja prodje kameru vracamo na pocetak tj. "sutnemo" je u daljinu
 {		
-	if(prepreke[index].pozy < -13)
+	if(prepreke[index].pozy < -13)              //Prosla kameru - index je prva prepreka u nizu na pocetku
 	{
-		double MaxUdaljenost = prepreke[pozmax].pozy + rand()%3 + 9;
+		double MaxUdaljenost = prepreke[pozmax].pozy + rand()%3 + 9; //Koordinata udaljenosti trenutno najdalje prepreke + razmak ===> Udaljenost sutnute prepr.
 		
-		for(int j = 0; j < 4; j++)
-		{
+		for(int j = 0; j < 4; j++)                                   //Prsten generisemo, bice nasumican tako da daje iluziju beskonacnosti
+		{                                                            //Ovo radimo na isti nacin kao i kada INITUJEMO niz prepreka prvi put
 			int dodatnaRot = rand()%90;
 						
 			prepreke[index + j].pozy = MaxUdaljenost;;
-			prepreke[index + j].pozz = j*90 + dodatnaRot; //rotacija
+			prepreke[index + j].pozz = j*90 + dodatnaRot; 
 		}
 		index += 4; pozmax = index-1;
 		if(index == broj_prepreka){		
@@ -310,7 +310,7 @@ void obstacle_renew()
 	}
 }
 
-void draw_obstacle(int rot, double pomeraj, double visina){
+void draw_obstacle(int rot, double pomeraj, double visina){         //Crtamo prepreku
 
 	glPushMatrix();
 
@@ -328,8 +328,6 @@ void draw_obstacle(int rot, double pomeraj, double visina){
 		glTranslatef(visina, pomeraj, 0); // 0.75 je min visina za x koord
 		glScalef(3, 3, 1.2);
 		glutSolidCube(1);
-        
-		//glutWireCube(3);
 		
 	glPopMatrix();
 }
@@ -338,7 +336,7 @@ void draw_obstacles(){
 	
 	for(int i=0; i < broj_prepreka; i++)
 	{
-        if(max_param == -1){
+        if(max_param == -1){                                //Ovo je zapravo kolizija prepreke sa hitboxom loptice -uvek fiksiran-
 
             if((prepreke[i].pozz >= 0 && prepreke[i].pozz <=20 
             || (prepreke[i].pozz >= 340 && prepreke[i].pozz <360))
