@@ -351,18 +351,14 @@ void draw_obstacles(){
             }
         }
         else if(max_param + 50 <= animation_parameter){
-            max_param = -1;
-             
-        }
-        else{ 
-
+            max_param = -1;             
         }
 
 		draw_obstacle(prepreke[i].pozz, prepreke[i].pozy, prepreke[i].pozx);
 	}
 }
 
-void obstacles_init()
+void obstacles_init()                                   //Init prepreka na pocetku - punimo niz prepreka                              
 {
 	srand(time(0));//NULL
 	double pomeraj = 9;
@@ -373,9 +369,9 @@ void obstacles_init()
 			int dodatnaRot = rand()%90;
 						
 			prepreke[4*i + j].pozy = pomeraj;
-			prepreke[4*i + j].pozz = j*90 + dodatnaRot; //rotacija
+			prepreke[4*i + j].pozz = j*90 + dodatnaRot; //Rotacija
 		}
-		pomeraj += rand()%3 + 9; //podesi
+		pomeraj += rand()%3 + 9;                        //Razmak izmedju "prstena"
 	}
 }
 
@@ -390,10 +386,10 @@ void on_display() {
               0, 200, 0,
               0, 1, 0);
 
-    sprintf(buffer, "Score : %d ", animation_parameter);
+    sprintf(buffer, "Score : %d ", animation_parameter); //Ispis skora na ekran
     text_log(6.2, 2.5, buffer);
     
-    sprintf(buffer, "Health : %d ", health);
+    sprintf(buffer, "Health : %d ", health);             //Ispis helta na ekran
     text_log(6, 2.5, buffer);
 
 
@@ -410,20 +406,20 @@ void on_display() {
    	
     draw_obstacles();
 
-    temp = true;
+    temp = true;                                    //Flag za blinkanje loptice; DEFAUL - true 
     if(max_param != -1)
     {
-        temp = (animation_parameter / 8) % 2;
+        temp = (animation_parameter / 8) % 2;       //Kada se desi kolicija flag naizmenicno iskljucivati i ukljucivati
     }
     if(temp == true)
         draw_ball();
 
-        glutPostRedisplay();
+    glutPostRedisplay();
     glutSwapBuffers();
 }
 
-//Sa casa kopirano ucitavanje textura
-void texture_init(){
+
+void texture_init(){                                //Sa casa kopirano ucitavanje textura
 
     Image * image;
 
