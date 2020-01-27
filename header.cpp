@@ -1,5 +1,7 @@
 #include "header.h"
 #include <GL/glut.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <GL/freeglut.h>
 #include <iostream>
 #include <cstdio>
@@ -10,9 +12,15 @@
 #include <queue>
 #include <string>
 
+#include "image.c"
+
+#define FILENAME0 "wall.bmp"
+#define FILENAME1 "door.bmp"
+
 using namespace std;
 
 static char buffer[30];
+static GLuint names[2];
 
 static double translation_animate = 0.3;
 static double translation_rotate = 1;
@@ -99,13 +107,13 @@ void on_keyboard(unsigned char key, int x, int y) {
         		break;
         case 'a':
         case 'A':
-        		faktor_rot += 0.3; 
+        		faktor_rot += 3; 
         		rotira_se_levo = 1;
         		rotira_se_desno = 0;    			
         		break;
         case 'd':
         case 'D':
-        		faktor_rot -= 0.3;
+        		faktor_rot -= 3;
         		rotira_se_levo = 0;
         		rotira_se_desno = 1;
         		break;
@@ -240,10 +248,11 @@ void draw_ball(){
     
     glTranslatef(2.55, -8, 0);
     glRotatef((4* animation_parameter)%360, 0, 0, 1);
+   //glBindTexture(GL_TEXTURE_2D, names[0]); //Ukljucuje se textura
     glutSolidSphere(0.3, 50, 50);
+   //glBindTexture(GL_TEXTURE_2D, 0); //Iskljucuje
     
     //gluCylinder(qobj, 10, 1.0, 0.4, 20, 20);
-
     glPopMatrix();
 }
 
@@ -260,14 +269,23 @@ void draw_floor(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
 
+   /* if (rotira_se_levo)
+        faktor_rot+=1;
+    if (rotira_se_desno)
+        faktor_rot-=1;*/
+    glBindTexture(GL_TEXTURE_2D,names[1]); //Ukljucje texturu
+
 	 glTranslatef(0,-100, 0);
 	 glRotatef(faktor_rot, 0, 1, 0);
     glRotatef(-90, 1, 0, 0);
+    gluQuadricDrawStyle(qobj, GLU_FILL); //Nesto ne znam sta radi
     gluCylinder(qobj, 2.4, 2.0, 400, 20, 20);
+    gluQuadricTexture(qobj, GL_TRUE); //Nesto drugo
     glTranslatef(0,100, 0);
-	 //glutSolidCylinder
-	 
+	 //glutSolidCylinder 
+     glBindTexture(GL_TEXTURE_2D,0); //Iskljucuje
     glPopMatrix();
+
 }
 
 void obstacle_renew()
@@ -309,6 +327,7 @@ void draw_obstacle(int rot, double pomeraj, double visina){
 		glTranslatef(visina, pomeraj, 0); // 0.75 je min visina za x koord
 		glScalef(3, 3, 1.2);
 		glutSolidCube(1);
+        
 		//glutWireCube(3);
 		
 	glPopMatrix();
@@ -379,7 +398,7 @@ void on_display() {
     text_log(6, 2.5, buffer);
 
 
-    //draw_axis(5);
+    //draw_axis(500);
     glPushMatrix();
 
         draw_floor();
@@ -400,6 +419,70 @@ void on_display() {
     if(temp == true)
         draw_ball();
 
-
+        glutPostRedisplay();
     glutSwapBuffers();
+}
+
+//Sa casa kopirano ucitavanje textura
+void texture_init(){
+
+    Image * image;
+
+    /* Postavlja se boja pozadine. */
+    glClearColor(0, 0, 0, 0);
+
+    /* Ukljucuje se testiranje z-koordinate piksela. */
+    glEnable(GL_DEPTH_TEST);
+
+    /* Ukljucuju se teksture. */
+    glEnable(GL_TEXTURE_2D);
+
+    glTexEnvf(GL_TEXTURE_ENV,
+              GL_TEXTURE_ENV_MODE,
+              GL_REPLACE);
+
+    /*
+     * Inicijalizuje se objekat koji ce sadrzati teksture ucitane iz
+     * fajla.
+     */
+    image = image_init(0, 0);
+
+    /* Kreira se prva tekstura. */
+    image_read(image, FILENAME0);
+
+    /* Generisu se identifikatori tekstura. */
+    glGenTextures(2, names);
+
+    glBindTexture(GL_TEXTURE_2D, names[0]);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 image->width, image->height, 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+
+    /* Kreira se druga tekstura. */
+    image_read(image, FILENAME1);
+
+    glBindTexture(GL_TEXTURE_2D, names[1]);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 image->width, image->height, 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+
+    /* Iskljucujemo aktivnu teksturu */
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    /* Unistava se objekat za citanje tekstura iz fajla. */
+    image_done(image);
 }

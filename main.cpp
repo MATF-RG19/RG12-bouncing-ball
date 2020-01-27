@@ -12,6 +12,7 @@
 
 using namespace std;
 
+void texture_init();
 
 int main(int argc, char **argv)
 {
@@ -34,7 +35,9 @@ int main(int argc, char **argv)
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    glEnable(GL_TEXTURE_2D);
     
+    texture_init();
     quadricsInit1();
     
 
@@ -52,7 +55,7 @@ int main(int argc, char **argv)
     glClearColor(0.24, 0.53, 0.77, 1);
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
 
-	obstacles_init();
+	  obstacles_init();
  	
     glutMainLoop();
 
