@@ -27,4 +27,4 @@ Cilj je sakupiti što više poena
 * Klonirati projekat na racunar `git clone https://github.com/MATF-RG19/RG12-bouncing-ball.git
 * Pozicionirati se u direktorijum RG18-bouncing-ball `cd RG18-bouncing-ball`
 * Pokrenuti Makefile `make`
-* Pokrenuti igricu `./main` 
+* Pokrenuti igricu `./BouncingBall` 
